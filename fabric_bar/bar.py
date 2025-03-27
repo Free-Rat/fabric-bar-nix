@@ -14,8 +14,10 @@ from fabric.widgets.wayland import WaylandWindow as Window
 from fabric.hyprland.widgets import Language, ActiveWindow, Workspaces, WorkspaceButton
 
 # from volume_widget import VolumeWidget
-from bar.volume_widget import VolumeWidget
-from bar.volume_widget import AUDIO_WIDGET
+from widgets.volume import VolumeWidget
+from widgets.volume import AUDIO_WIDGET
+
+from widgets.battery import BatteryWidget
 
 from fabric.utils import (
     FormattedString,
@@ -80,6 +82,7 @@ class StatusBar(Window):
             children=self.progress_bars_overlay,
         )
         self.status_container.add(VolumeWidget()) if AUDIO_WIDGET is True else None
+        # self.status_container.add(BatteryWidget(widget_config, self))
 
         self.children = CenterBox(
             name="bar-inner",

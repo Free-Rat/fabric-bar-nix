@@ -1,7 +1,19 @@
-{ lib, python3Packages, gtk3, gtk-layer-shell, cairo, gobject-introspection, libdbusmenu-gtk3, gdk-pixbuf, gnome, cinnamon, wrapGAppsHook3, ...}:
-
+{
+  lib,
+  python3Packages,
+  gtk3,
+  gtk-layer-shell,
+  cairo,
+  gobject-introspection,
+  libdbusmenu-gtk3,
+  gdk-pixbuf,
+  gnome,
+  cinnamon,
+  wrapGAppsHook3,
+  ...
+}:
 python3Packages.buildPythonApplication {
-  pname = "fabric-nix-example";
+  pname = "fabric-nix";
   version = "0.0.1";
   pyproject = true;
 
@@ -21,7 +33,9 @@ python3Packages.buildPythonApplication {
   #   gdk-pixbuf
   # ];
 
-  dependencies = with python3Packages; [ python-fabric ];
+  dependencies = with python3Packages; [
+    python-fabric
+  ];
   doCheck = false;
   dontWrapGApps = true;
 
