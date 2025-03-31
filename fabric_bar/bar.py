@@ -1,8 +1,10 @@
 # fabric bar.py example
 # https://github.com/Fabric-Development/fabric/blob/rewrite/examples/bar/bar.py
+from cProfile import label
 import psutil
 from fabric import Application
 from fabric.widgets.box import Box
+from fabric.widgets.button import Button
 from fabric.widgets.label import Label
 from fabric.widgets.overlay import Overlay
 from fabric.widgets.eventbox import EventBox
@@ -13,9 +15,7 @@ from fabric.widgets.circularprogressbar import CircularProgressBar
 from fabric.widgets.wayland import WaylandWindow as Window
 from fabric.hyprland.widgets import Language, ActiveWindow, Workspaces, WorkspaceButton
 
-# from volume_widget import VolumeWidget
 from widgets.volume import VolumeWidget
-from widgets.volume import AUDIO_WIDGET
 
 from widgets.battery import BatteryWidget
 
@@ -35,7 +35,7 @@ class StatusBar(Window):
             name="bar",
             layer="top",
             anchor="left top right",
-            margin="10px 10px -2px 10px",
+            margin="10px 10px 0px 10px",  # up right down left
             exclusivity="auto",
             visible=False,
             all_visible=False,
@@ -43,7 +43,8 @@ class StatusBar(Window):
         self.workspaces = Workspaces(
             name="workspaces",
             spacing=4,
-            buttons_factory=lambda ws_id: WorkspaceButton(id=ws_id, label=None),
+            # buttons=None,
+            buttons_factory=lambda ws_id: WorkspaceButton(id=ws_id, label=str(ws_id)),
         )
         self.active_window = ActiveWindow(name="hyprland-window")
         self.language = Language(
@@ -58,31 +59,34 @@ class StatusBar(Window):
             ),
             name="hyprland-window",
         )
-        self.date_time = DateTime(name="date-time")
+        self.date_time = DateTime(
+            name="date-time",
+            formatters=("%I:%M %A %d-%m-%Y", "%I:%M", "%A", "%m-%d-%Y"),
+        )
         self.system_tray = SystemTray(name="system-tray", spacing=4)
 
         self.ram_progress_bar = CircularProgressBar(
-            name="ram-progress-bar", pie=True, size=24
+            name="ram-progress-bar", pie=False, size=24
         )
         self.cpu_progress_bar = CircularProgressBar(
-            name="cpu-progress-bar", pie=True, size=24
+            name="cpu-progress-bar", pie=False, size=24
         )
         self.progress_bars_overlay = Overlay(
             child=self.ram_progress_bar,
             overlays=[
                 self.cpu_progress_bar,
-                Label("", style="margin: 0px 6px 0px 0px; font-size: 12px"),
+                Label(" ", style="margin: 0px 6px 0px 0px; font-size: 12px"),
             ],
         )
-
         self.status_container = Box(
             name="widgets-container",
             spacing=4,
             orientation="h",
             children=self.progress_bars_overlay,
         )
-        self.status_container.add(VolumeWidget()) if AUDIO_WIDGET is True else None
-        # self.status_container.add(BatteryWidget(widget_config, self))
+        self.battery = BatteryWidget()
+        self.status_container.add(VolumeWidget())  # if AUDIO_WIDGET is True else None
+        self.status_container.add(self.battery)
 
         self.children = CenterBox(
             name="bar-inner",
@@ -96,16 +100,19 @@ class StatusBar(Window):
                 name="center-container",
                 spacing=4,
                 orientation="h",
-                children=self.active_window,
+                children=[
+                    self.date_time,
+                ],
             ),
             end_children=Box(
                 name="end-container",
                 spacing=4,
                 orientation="h",
                 children=[
+                    self.active_window,
                     self.status_container,
+                    # self.battery,
                     self.system_tray,
-                    self.date_time,
                     self.language,
                 ],
             ),
@@ -118,6 +125,7 @@ class StatusBar(Window):
     def update_progress_bars(self):
         self.ram_progress_bar.value = psutil.virtual_memory().percent / 100
         self.cpu_progress_bar.value = psutil.cpu_percent() / 100
+        self.battery.on_update()
         return True
 
 

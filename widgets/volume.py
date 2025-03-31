@@ -27,17 +27,18 @@ class VolumeWidget(Box):
         self.audio = Audio()
 
         self.progress_bar = CircularProgressBar(
-            name="volume-progress-bar", pie=True, size=24
+            name="volume-progress-bar", pie=False, size=24
+        )
+        self.label = Label(
+            label=" ",
+            style="margin: 0px 6px 0px 0px; font-size: 12px",  # to center the icon glyph
         )
 
         self.event_box = EventBox(
             events="scroll",
             child=Overlay(
                 child=self.progress_bar,
-                overlays=Label(
-                    label="",
-                    style="margin: 0px 6px 0px 0px; font-size: 12px",  # to center the icon glyph
-                ),
+                overlays=self.label,
             ),
         )
 
@@ -60,4 +61,10 @@ class VolumeWidget(Box):
         self.audio.speaker.bind(
             "volume", "value", self.progress_bar, lambda _, v: v / 100
         )
+        # TODO:
+        # if self.audio.speaker.muted:
+        #     self.label.set_label("x")
+        # else:
+        #     self.label.set_label(" ")
+
         return
