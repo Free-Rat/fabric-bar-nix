@@ -17,6 +17,10 @@ class BatteryWidget(Box):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        if self.get_battery_info("BAT0") == (None, None, None, None):
+            self.visible = False
+            return
+
         self.progress_bar_0 = CircularProgressBar(
             name="battery-progress-bar",
             pie=False,
@@ -61,6 +65,8 @@ class BatteryWidget(Box):
         return capacity, status, max_capacity, current_capacity
 
     def on_update(self, *_):
+        if not self.visible:
+            return
         b1 = self.get_battery_info(battery="BAT1")
         b0 = self.get_battery_info(battery="BAT0")
         self.progress_bar_0.value = int(b0[0])
